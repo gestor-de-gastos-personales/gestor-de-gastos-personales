@@ -1,26 +1,48 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGastoDto } from './dto/create-gasto.dto.js';
 import { UpdateGastoDto } from './dto/update-gasto.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class GastosService {
-  create(createGastoDto: CreateGastoDto) {
-    return 'Esta acción crea un nuevo gasto';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createGastoDto: CreateGastoDto) {
+    return await this.prisma.gasto.create({
+      data: createGastoDto,
+    });
   }
 
-  findAll() {
-    return `Esta acción devuelve todos los gastos`;
+  async findAll() {
+    return await this.prisma.gasto.findMany();
   }
 
-  findOne(id: number) {
-    return `Esta acción devuelve el gasto con ID #${id}`;
+  async findOne(id: number) {
+    const gasto = await this.prisma.gasto.findUnique({
+      where: { id },
+    });
+
+    if (!gasto) {
+      throw new NotFoundException(`Gasto con ID #${id} no encontrado`);
+    }
+
+    return gasto;
   }
 
-  update(id: number, updateGastoDto: UpdateGastoDto) {
-    return `Esta acción actualiza el gasto con ID #${id}`;
+  async update(id: number, updateGastoDto: UpdateGastoDto) {
+    await this.findOne(id);
+
+    return await this.prisma.gasto.update({
+      where: { id },
+      data: updateGastoDto,
+    });
   }
 
-  remove(id: number) {
-    return `Esta acción elimina el gasto con ID #${id}`;
+  async remove(id: number) {
+    await this.findOne(id);
+
+    return await this.prisma.gasto.delete({
+      where: { id },
+    });
   }
 }
