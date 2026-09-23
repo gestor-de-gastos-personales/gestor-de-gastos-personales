@@ -1,0 +1,11 @@
+-- CreateTable
+CREATE TABLE "Gasto" (
+    "id" SERIAL NOT NULL,
+    "descripcion" TEXT NOT NULL,
+    "valor" DECIMAL(10,2) NOT NULL,
+    "fecha" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Gasto_pkey" PRIMARY KEY ("id")
+);
