@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -15,9 +14,9 @@ datasource db {
 }
 
 model Gasto {
-  id          Int      @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   descripcion String
-  valor       Decimal @db.Decimal(10, 2)
+  valor       Decimal  @db.Decimal(10, 2)
   fecha       DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
