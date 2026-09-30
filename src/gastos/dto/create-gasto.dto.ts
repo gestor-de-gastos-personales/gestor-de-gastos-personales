@@ -12,4 +12,8 @@ export class CreateGastoDto {
   @IsOptional()
   @IsDateString()
   fecha?: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  categoria: number;
 }

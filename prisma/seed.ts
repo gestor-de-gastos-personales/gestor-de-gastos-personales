@@ -35,6 +35,10 @@ const categoriasPorDefecto = [
   }
 
   console.log('Seed ejecutado: Categorías por defecto sincronizadas.');
+
+  await prisma.$executeRawUnsafe(
+    `SELECT setval(pg_get_serial_sequence('"Categoria"', 'id'), coalesce(max(id), 1)) FROM "Categoria";`
+  );
 }
 
 main()

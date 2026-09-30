@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateCategoriaDto } from './dto/create-categoria.dto.js';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 
 @Injectable()
 export class CategoriasService {
-  create(createCategoriaDto: CreateCategoriaDto) {
-    return 'This action adds a new categoria';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createCategoriaDto: CreateCategoriaDto) {
+    return this.prisma.categoria.create({
+      data: {
+        nombre: createCategoriaDto.nombre,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all categorias`;
+  async findAll() {
+    return await this.prisma.categoria.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} categoria`;
+  async findOne(id: number) {
+    const categoria = await this.prisma.categoria.findUnique({
+      where: { id },
+    });
+
+    if (!categoria) {
+      throw new NotFoundException(`Categoría con ID #${id} no encontrada`);
+    }
+
+    return categoria;
   }
 
-  update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
-    return `This action updates a #${id} categoria`;
+  async update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
+    const categoria = await this.findOne(id);
+
+    if (categoria.default) {
+      throw new ForbiddenException('No se pueden modificar las categorías por defecto del sistema');
+    }
+
+    return await this.prisma.categoria.update({
+      where: { id },
+      data: updateCategoriaDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} categoria`;
+  async remove(id: number) {
+    const categoria = await this.findOne(id);
+
+    if (categoria.default) {
+      throw new ForbiddenException('No se pueden eliminar las categorías por defecto del sistema');
+    }
+
+    return await this.prisma.categoria.delete({
+      where: { id },
+    });
   }
 }
