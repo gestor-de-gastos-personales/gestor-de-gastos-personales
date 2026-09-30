@@ -1,0 +1,58 @@
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { CreateCategoriaDto } from './dto/create-categoria.dto.js';
+import { UpdateCategoriaDto } from './dto/update-categoria.dto.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+
+@Injectable()
+export class CategoriasService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createCategoriaDto: CreateCategoriaDto) {
+    return this.prisma.categoria.create({
+      data: {
+        nombre: createCategoriaDto.nombre,
+      },
+    });
+  }
+
+  async findAll() {
+    return await this.prisma.categoria.findMany();
+  }
+
+  async findOne(id: number) {
+    const categoria = await this.prisma.categoria.findUnique({
+      where: { id },
+    });
+
+    if (!categoria) {
+      throw new NotFoundException(`Categoría con ID #${id} no encontrada`);
+    }
+
+    return categoria;
+  }
+
+  async update(id: number, updateCategoriaDto: UpdateCategoriaDto) {
+    const categoria = await this.findOne(id);
+
+    if (categoria.default) {
+      throw new ForbiddenException('No se pueden modificar las categorías por defecto del sistema');
+    }
+
+    return await this.prisma.categoria.update({
+      where: { id },
+      data: updateCategoriaDto,
+    });
+  }
+
+  async remove(id: number) {
+    const categoria = await this.findOne(id);
+
+    if (categoria.default) {
+      throw new ForbiddenException('No se pueden eliminar las categorías por defecto del sistema');
+    }
+
+    return await this.prisma.categoria.delete({
+      where: { id },
+    });
+  }
+}

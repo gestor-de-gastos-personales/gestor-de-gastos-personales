@@ -8,18 +8,40 @@ export class GastosService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createGastoDto: CreateGastoDto) {
-    return await this.prisma.gasto.create({
-      data: createGastoDto,
+
+    // 1. Verificar si la categoría existe antes de crear
+    const categoriaExiste = await this.prisma.categoria.findUnique({
+      where: { id: createGastoDto.categoria },
     });
+
+    if (!categoriaExiste) {
+      throw new NotFoundException(`La categoría con ID #${createGastoDto.categoria} no existe`);
+    }
+    
+    return this.prisma.gasto.create({
+      data: {
+        descripcion: createGastoDto.descripcion,
+        valor: createGastoDto.valor,
+        id_categoria_fk: createGastoDto.categoria,
+      },
+    });
+    
   }
 
   async findAll() {
-    return await this.prisma.gasto.findMany();
+    return await this.prisma.gasto.findMany({
+      include: {
+        categoria: true,
+      },
+    });
   }
 
   async findOne(id: number) {
     const gasto = await this.prisma.gasto.findUnique({
       where: { id },
+      include: {
+        categoria: true,
+      },
     });
 
     if (!gasto) {
@@ -34,7 +56,11 @@ export class GastosService {
 
     return await this.prisma.gasto.update({
       where: { id },
-      data: updateGastoDto,
+      data: {
+        descripcion: updateGastoDto.descripcion,
+        valor: updateGastoDto.valor,
+        id_categoria_fk: updateGastoDto.categoria,
+      },
     });
   }
 
