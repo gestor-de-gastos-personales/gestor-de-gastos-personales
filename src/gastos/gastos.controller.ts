@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query} from '@nestjs/common';
 import { GastosService } from './gastos.service.js';
 import { CreateGastoDto } from './dto/create-gasto.dto.js';
 import { UpdateGastoDto } from './dto/update-gasto.dto.js';
+import { FilterGastosDto } from './dto/filter-gasto.dto.js';
 
 @Controller('gastos')
 export class GastosController {
@@ -13,14 +14,15 @@ export class GastosController {
   }
 
   @Get()
-  findAll() {
-    return this.gastosService.findAll();
+  findAll(@Query() filterDto: FilterGastosDto) {
+    return this.gastosService.findAll(filterDto);
   }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.gastosService.findOne(id);
   }
+  
 
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body() updateGastoDto: UpdateGastoDto) {
