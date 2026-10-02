@@ -1,4 +1,5 @@
-import { IsOptional, Matches } from 'class-validator';
+import { IsOptional, Matches, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class FilterGastosDto {
   @IsOptional()
@@ -12,4 +13,9 @@ export class FilterGastosDto {
     message: 'fechaFin debe tener el formato DD-MM-YYYY (ej: 31-10-2026)',
   })
   fechaFin?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'categoriaId debe ser un número entero' })
+  categoriaId?: number;
 }
