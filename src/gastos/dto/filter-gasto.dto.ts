@@ -1,4 +1,4 @@
-import { IsOptional, Matches, IsInt } from 'class-validator';
+import { IsOptional, Matches, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FilterGastosDto {
@@ -18,4 +18,16 @@ export class FilterGastosDto {
   @Type(() => Number)
   @IsInt({ message: 'categoriaId debe ser un número entero' })
   categoriaId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 10;
 }

@@ -35,33 +35,51 @@ export class GastosService {
     });
   }
 
-  async findAll(filterDto?: FilterGastosDto) {
-    const where: Prisma.GastoWhereInput = {};
+async findAll(filterDto?: FilterGastosDto) {
+  const { page = 1, limit = 10, fechaInicio, fechaFin, categoriaId } = filterDto || {};
+  const where: Prisma.GastoWhereInput = {};
 
-    // 1. Filtro por rango de fechas (DD-MM-YYYY)
-    if (filterDto?.fechaInicio || filterDto?.fechaFin) {
-      where.fecha = {
-        ...(filterDto.fechaInicio && { gte: this.parseFechaArg(filterDto.fechaInicio) }),
-        ...(filterDto.fechaFin && { lte: this.parseFechaArg(filterDto.fechaFin, true) }),
-      };
-    }
-
-    // 2. Filtro por categoría
-// 2. Filtro por categoría
-    if (filterDto?.categoriaId) {
-      where.id_categoria_fk = Number(filterDto.categoriaId); // Convertir string a number
-    }
-
-    return await this.prisma.gasto.findMany({
-      where,
-      include: {
-        categoria: true,
-      },
-      orderBy: {
-        fecha: 'desc', // Muestra los registros más recientes primero
-      },
-    });
+  // 1. Filtro por rango de fechas
+  if (fechaInicio || fechaFin) {
+    where.fecha = {
+      ...(fechaInicio && { gte: this.parseFechaArg(fechaInicio) }),
+      ...(fechaFin && { lte: this.parseFechaArg(fechaFin, true) }),
+    };
   }
+
+  // 2. Filtro por categoría
+  if (categoriaId) {
+    where.id_categoria_fk = Number(categoriaId);
+  }
+
+  // 3. Cálculo de paginación
+  const pageNum = Number(page);
+  const limitNum = Number(limit);
+  const skip = (pageNum - 1) * limitNum;
+
+  // Ejecutamos ambas consultas en paralelo
+  const [data, total] = await this.prisma.$transaction([
+    this.prisma.gasto.findMany({
+      where,
+      include: { categoria: true },
+      orderBy: { fecha: 'desc' },
+      skip,
+      take: limitNum,
+    }),
+    this.prisma.gasto.count({ where }),
+  ]);
+
+  // Devuelve los registros y la metadata de paginación
+  return {
+    data,
+    meta: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
+    },
+  };
+}
 
   async findOne(id: number) {
     const gasto = await this.prisma.gasto.findUnique({
