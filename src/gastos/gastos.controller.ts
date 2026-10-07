@@ -3,6 +3,7 @@ import { GastosService } from './gastos.service.js';
 import { CreateGastoDto } from './dto/create-gasto.dto.js';
 import { UpdateGastoDto } from './dto/update-gasto.dto.js';
 import { FilterGastosDto } from './dto/filter-gasto.dto.js';
+import { FilterResumenDto } from './dto/filter-resumen.dto.js';
 
 @Controller('gastos')
 export class GastosController {
@@ -16,6 +17,11 @@ export class GastosController {
   @Get()
   findAll(@Query() filterDto: FilterGastosDto) {
     return this.gastosService.findAll(filterDto);
+  }
+
+  @Get('resumen')
+  getResumen(@Query() filterDto: FilterResumenDto) {
+    return this.gastosService.getResumen(filterDto);
   }
 
   @Get(':id')
