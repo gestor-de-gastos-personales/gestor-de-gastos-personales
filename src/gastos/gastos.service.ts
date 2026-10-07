@@ -38,12 +38,18 @@ export class GastosService {
   async findAll(filterDto?: FilterGastosDto) {
     const where: Prisma.GastoWhereInput = {};
 
-    // Si se envían fechas de filtro, se aplican a la consulta
+    // 1. Filtro por rango de fechas (DD-MM-YYYY)
     if (filterDto?.fechaInicio || filterDto?.fechaFin) {
-      where.fecha = { // Reemplaza 'fecha' por 'createdAt' si ese es el campo en tu schema.prisma
+      where.fecha = {
         ...(filterDto.fechaInicio && { gte: this.parseFechaArg(filterDto.fechaInicio) }),
         ...(filterDto.fechaFin && { lte: this.parseFechaArg(filterDto.fechaFin, true) }),
       };
+    }
+
+    // 2. Filtro por categoría
+// 2. Filtro por categoría
+    if (filterDto?.categoriaId) {
+      where.id_categoria_fk = Number(filterDto.categoriaId); // Convertir string a number
     }
 
     return await this.prisma.gasto.findMany({
